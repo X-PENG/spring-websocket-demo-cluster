@@ -10,6 +10,7 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * Redis订阅频道处理类
@@ -21,6 +22,9 @@ public class RedisListenerHandle extends MessageListenerAdapter {
 
     @Value("${redis.channel.msgToAll}")
     private String msgToAll;
+
+    @Value("${redis.channel.singleChat}")
+    private String singleChat;
 
     @Value("${redis.channel.userStatus}")
     private String userStatus;
@@ -55,15 +59,19 @@ public class RedisListenerHandle extends MessageListenerAdapter {
         }
 
 
-        if (msgToAll.equals(topic)) {
+        ChatMessage chatMessage = JsonUtil.parseJsonToObj(rawMsg, ChatMessage.class);
+        if (singleChat.equals(topic)){
+            log.info("Send message to one user:" + rawMsg);
+            if (chatMessage != null && ChatMessage.MessageType.SINGLE_CHAT.equals(chatMessage.getType()) && !StringUtils.isEmpty(chatMessage.getReceiver())) {
+                chatService.pushMsgToUser(chatMessage);
+            }
+        } else if (msgToAll.equals(topic)) {
             log.info("Send message to all users:" + rawMsg);
-            ChatMessage chatMessage = JsonUtil.parseJsonToObj(rawMsg, ChatMessage.class);
-            if (chatMessage != null) {
+            if (chatMessage != null && ChatMessage.MessageType.CHAT.equals(chatMessage.getType())) {
                 chatService.pushMsg(chatMessage);
             }
         } else if (userStatus.equals(topic)) {
-            ChatMessage chatMessage = JsonUtil.parseJsonToObj(rawMsg, ChatMessage.class);
-            if (chatMessage != null) {
+            if (chatMessage != null && ChatMessage.MessageType.JOIN.equals(chatMessage.getType())) {
                 chatService.pushUserStatus(chatMessage);
             }
         }else {

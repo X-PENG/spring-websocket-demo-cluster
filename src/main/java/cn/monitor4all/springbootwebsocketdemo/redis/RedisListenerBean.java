@@ -1,5 +1,6 @@
 package cn.monitor4all.springbootwebsocketdemo.redis;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,16 +18,18 @@ import java.net.InetAddress;
  * Redis订阅频道属性类
  * @author yangzhendong01
  */
+@Slf4j
 @Component
 public class RedisListenerBean {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisListenerBean.class);
 
     @Value("${server.port}")
     private String serverPort;
 
     @Value("${redis.channel.msgToAll}")
     private String msgToAll;
+
+    @Value("${redis.channel.singleChat}")
+    private String singleChat;
 
     @Value("${redis.channel.userStatus}")
     private String userStatus;
@@ -46,8 +49,11 @@ public class RedisListenerBean {
 
         // 监听msgToAll
         container.addMessageListener(listenerAdapter, new PatternTopic(msgToAll));
+        container.addMessageListener(listenerAdapter, new PatternTopic(singleChat));
         container.addMessageListener(listenerAdapter, new PatternTopic(userStatus));
-        LOGGER.info("Subscribed Redis channel: " + msgToAll);
+        log.info("Subscribed Redis channel: " + msgToAll);
+        log.info("Subscribed Redis channel: " + singleChat);
+        log.info("Subscribed Redis channel: " + userStatus);
         return container;
     }
 }

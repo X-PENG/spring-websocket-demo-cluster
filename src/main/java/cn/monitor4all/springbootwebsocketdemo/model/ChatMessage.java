@@ -5,11 +5,13 @@ public class ChatMessage {
     private MessageType type;
     private String content;
     private String sender;
+    private String receiver;
 
     public enum MessageType {
-        CHAT,
+        CHAT,//群聊
         JOIN,
-        LEAVE
+        LEAVE,
+        SINGLE_CHAT//单聊
     }
 
     public MessageType getType() {
@@ -36,12 +38,21 @@ public class ChatMessage {
         this.sender = sender;
     }
 
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
+
     @Override
     public String toString() {
         return "ChatMessage{" +
                 "type=" + type +
                 ", content='" + content + '\'' +
                 ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
                 '}';
     }
 }

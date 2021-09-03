@@ -21,6 +21,9 @@ public class ChatController {
     @Value("${redis.channel.msgToAll}")
     private String msgToAll;
 
+    @Value("${redis.channel.singleChat}")
+    private String singleChat;
+
     @Value("${redis.set.onlineUsers}")
     private String onlineUsers;
 
@@ -33,11 +36,21 @@ public class ChatController {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
-    @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload ChatMessage chatMessage) {
+    @MessageMapping("/chat.sendAll")
+    public void sendAll(@Payload ChatMessage chatMessage) {
         try {
-            //给channel发布聊天消息
+            //给群聊channel发布聊天消息
             redisTemplate.convertAndSend(msgToAll, JsonUtil.parseObjToJson(chatMessage));
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    @MessageMapping("/chat.sendToUser")
+    public void sendToUser(@Payload ChatMessage chatMessage) {
+        try {
+            //给单聊channel发布聊天消息
+            redisTemplate.convertAndSend(singleChat, JsonUtil.parseObjToJson(chatMessage));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

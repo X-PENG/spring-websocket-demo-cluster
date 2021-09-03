@@ -21,12 +21,17 @@ public class ChatService {
      * @param chatMessage
      */
     public void pushMsg(@Payload ChatMessage chatMessage) {
-        log.info("Send msg by simpMessageSendingOperations:" + chatMessage.toString());
+        log.info("pushMsg:" + chatMessage.toString());
         simpMessageSendingOperations.convertAndSend("/topic/public", chatMessage);
     }
 
+    public void pushMsgToUser(@Payload ChatMessage chatMessage) {
+        log.info("pushMsgToUser:" + chatMessage.toString());
+        simpMessageSendingOperations.convertAndSendToUser(chatMessage.getReceiver(), "/unique/chat", chatMessage);
+    }
+
     public void pushUserStatus(@Payload ChatMessage chatMessage) {
-        log.info("Alert user online by simpMessageSendingOperations:" + chatMessage.toString());
+        log.info("pushUserStatus:" + chatMessage.toString());
         simpMessageSendingOperations.convertAndSend("/topic/public", chatMessage);
     }
 }

@@ -35,11 +35,24 @@
             <ul id="messageArea">
 
             </ul>
-            <form id="messageForm" name="messageForm" nameForm="messageForm">
+
+            <!--      群聊的聊天框      -->
+            <form id="messageForm" name="messageForm" nameForm="messageForm" class="messageFormBox">
                 <div class="form-group">
                     <div class="input-group clearfix">
                         <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
-                        <button id="sendMsgBtn" type="submit" class="primary">Send</button>
+                        <button id="sendMsgBtn" type="submit" class="primary">SendAll</button>
+                    </div>
+                </div>
+            </form>
+
+            <!--      单聊的聊天框      -->
+            <form id="messageForm2" name="messageForm2" nameForm="messageForm2" class="messageFormBox">
+                <div class="form-group">
+                    <div class="input-group clearfix">
+                        <input type="text" id="message2" placeholder="Type a message..." autocomplete="off" class="form-control"/>
+                        <input type="text" id="toUser" placeholder="username" autocomplete="off" class="form-control"/>
+                        <button id="sendMsgBtn2" type="submit" class="primary">SendTo</button>
                     </div>
                 </div>
             </form>
@@ -58,6 +71,8 @@
           var chatPage = $('#chat-page');
           var usernameInput = $('#name');
           var messageInput = $('#message');
+          var messageInput2 = $('#message2');
+          var toUserInput = $('#toUser');
           var messageArea = document.querySelector('#messageArea');
           var connectingElement = $('.connecting');
           var loginBtn = $('#loginBtn');
@@ -66,6 +81,7 @@
 
           var usernameForm = $('#usernameForm');
           var messageForm = $('#messageForm');
+          var messageForm2 = $('#messageForm2');
 
           var stompClient = null;
           var username = null;
@@ -124,18 +140,36 @@
           }
 
 
-          function sendMessage(event) {
+          function sendAll(event) {
               var messageContent = messageInput.val().trim();
 
               if(messageContent && stompClient) {
-                  console.log("sendMessage: " + messageContent)
+                  console.log("sendAll: " + messageContent)
                   var chatMessage = {
                       sender: username,
                       content: messageContent,
                       type: 'CHAT'
                   };
 
-                  stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+                  stompClient.send("/app/chat.sendAll", {}, JSON.stringify(chatMessage));
+                  messageInput.val('');
+              }
+          }
+
+          function sendToUser() {
+              var messageContent = messageInput2.val().trim();
+              var receiverName = toUserInput.val().trim();
+
+              if(messageContent && receiverName && stompClient) {
+                  console.log("sendToUser: " + messageContent)
+                  var chatMessage = {
+                      sender: username,
+                      receiver: receiverName,
+                      content: messageContent,
+                      type: 'SINGLE_CHAT'
+                  };
+
+                  stompClient.send("/app/chat.sendToUser", {}, JSON.stringify(chatMessage));
                   messageInput.val('');
               }
           }
@@ -216,7 +250,12 @@
 
           messageForm.submit(function (event) {
               event.preventDefault()
-              sendMessage(event)
+              sendAll(event)
+          })
+
+          messageForm2.submit(function (event) {
+              event.preventDefault()
+              sendToUser(event)
           })
 
       })
