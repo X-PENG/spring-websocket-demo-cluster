@@ -1,5 +1,6 @@
 package cn.monitor4all.springbootwebsocketdemo.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
@@ -9,9 +10,12 @@ import org.springframework.web.socket.config.annotation.*;
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    @Autowired
+    MyHandShakeHandler myHandShakeHandler;
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").withSockJS();
+        registry.addEndpoint("/ws").setHandshakeHandler(myHandShakeHandler).withSockJS();
     }
 
     @Override
@@ -19,8 +23,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry.setApplicationDestinationPrefixes("/app");
 
         // Enables a simple in-memory broker
-        registry.enableSimpleBroker("/topic");
-
+        registry.enableSimpleBroker("/topic", "/unique");
 
         //   Use this for enabling a Full featured broker like RabbitMQ
         /*

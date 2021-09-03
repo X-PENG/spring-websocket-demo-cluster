@@ -45,9 +45,9 @@ public class ChatController {
 
     @MessageMapping("/chat.addUser")
     public void addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-
         log.info("User added in Chatroom:" + chatMessage.getSender());
         try {
+            //headerAccessor实际类型：StompHeaderAccessor，每次连接得到的对象都不一样
             headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
             redisTemplate.opsForSet().add(onlineUsers, chatMessage.getSender());
             //给channel发布用户上线消息

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -35,11 +36,16 @@ public class WebSocketEventListener {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    public static String sesionId;
+
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         InetAddress localHost;
         try {
             localHost = Inet4Address.getLocalHost();
+            SimpMessageHeaderAccessor simpMessageHeaderAccessor = SimpMessageHeaderAccessor.wrap(event.getMessage());
+            System.out.println(simpMessageHeaderAccessor.getSessionId());
+            sesionId = simpMessageHeaderAccessor.getSessionId();
             log.info("Received a new web socket connection from:" + localHost.getHostAddress() + ":" + serverPort);
         } catch (Exception e) {
             log.error(e.getMessage(), e);

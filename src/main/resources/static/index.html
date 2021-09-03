@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" charset="UTF-8">
       <title>Spring Boot WebSocket Chat Application | CalliCoder</title>
       <link rel="stylesheet" href="/css/main.css" />
   </head>
@@ -18,7 +18,7 @@
                     <input type="text" id="name" placeholder="Username" autocomplete="off" class="form-control" />
                 </div>
                 <div class="form-group">
-                    <button type="submit" class="accent username-submit">Start Chatting</button>
+                    <button id="loginBtn" type="submit" class="accent username-submit">Start Chatting</button>
                 </div>
             </form>
         </div>
@@ -27,7 +27,7 @@
     <div id="chat-page" class="hidden">
         <div class="chat-container">
             <div class="chat-header">
-                <h2>Spring WebSocket Chat Demo</h2>
+                <h2 id="curUserBox">Spring WebSocket Chat Demo</h2>
             </div>
             <div class="connecting">
                 Connecting...
@@ -39,7 +39,7 @@
                 <div class="form-group">
                     <div class="input-group clearfix">
                         <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
-                        <button type="submit" class="primary">Send</button>
+                        <button id="sendMsgBtn" type="submit" class="primary">Send</button>
                     </div>
                 </div>
             </form>
@@ -48,6 +48,178 @@
 
     <script src="https://cdn.bootcss.com/sockjs-client/1.1.4/sockjs.min.js"></script>
     <script src="https://cdn.bootcss.com/stomp.js/2.3.3/stomp.min.js"></script>
-    <script src="/js/main.js"></script>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<!--    <script src="/js/main.js"></script>-->
+
+  <script language="JavaScript">
+      $(function () {
+          console.log("init初始化")
+          var usernamePage = $('#username-page');
+          var chatPage = $('#chat-page');
+          var usernameInput = $('#name');
+          var messageInput = $('#message');
+          var messageArea = document.querySelector('#messageArea');
+          var connectingElement = $('.connecting');
+          var loginBtn = $('#loginBtn');
+          var sendMsgBtn = $('#sendMsgBtn');
+          var curUserBox = $('#curUserBox');
+
+          var usernameForm = $('#usernameForm');
+          var messageForm = $('#messageForm');
+
+          var stompClient = null;
+          var username = null;
+
+          var colors = [
+              '#2196F3', '#32c787', '#00BCD4', '#ff5652',
+              '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
+          ];
+
+          function myLogin(event) {
+              username = usernameInput.val()
+              console.log("login 登陆：" + username)
+              $.get("/user/login/"+username, function (data, status) {
+                  console.log("登陆成功：" + username)
+                  connect()
+              })
+          }
+
+          function connect() {
+              if(username) {
+                  console.log(username + " connect...")
+                  usernamePage.addClass('hidden');
+                  chatPage.removeClass('hidden');
+                  var userSpan = document.createElement("span");
+                  userSpan.textContent = '【' + username + '】'
+                  curUserBox.append(userSpan);
+
+                  var socket = new SockJS('/ws');
+                  stompClient = Stomp.over(socket);
+
+                  stompClient.connect({}, onConnected, onError);
+              }
+          }
+
+          function onConnected() {
+              console.log("connect success, username=" + username)
+              // Subscribe to the Public Topic
+              stompClient.subscribe('/topic/public', onMessageReceived);
+
+              //Subscribe to the unique destination
+              stompClient.subscribe('/user/unique/chat', onMessageReceived);
+
+              // Tell your username to the server
+              stompClient.send("/app/chat.addUser",
+                  {},
+                  JSON.stringify({sender: username, type: 'JOIN'})
+              )
+
+              connectingElement.addClass('hidden');
+          }
+
+
+          function onError(error) {
+              connectingElement.text('Could not connect to WebSocket server. Please refresh this page to try again!');
+              connectingElement.css('color', 'red')
+          }
+
+
+          function sendMessage(event) {
+              var messageContent = messageInput.val().trim();
+
+              if(messageContent && stompClient) {
+                  console.log("sendMessage: " + messageContent)
+                  var chatMessage = {
+                      sender: username,
+                      content: messageContent,
+                      type: 'CHAT'
+                  };
+
+                  stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+                  messageInput.val('');
+              }
+          }
+
+
+          function onMessageReceived(payload) {
+              var message = JSON.parse(payload.body);
+
+              var messageElement = document.createElement('li');
+
+              if(message.type === 'JOIN') {
+                  messageElement.classList.add('event-message');
+                  message.content = message.sender + ' joined!';
+              } else if (message.type === 'LEAVE') {
+                  messageElement.classList.add('event-message');
+                  message.content = message.sender + ' left!';
+              } else {
+                  messageElement.classList.add('chat-message');
+
+                  var avatarElement = document.createElement('i');
+                  var avatarText = document.createTextNode(message.sender[0]);
+                  avatarElement.appendChild(avatarText);
+                  avatarElement.style['background-color'] = getAvatarColor(message.sender);
+
+                  messageElement.appendChild(avatarElement);
+
+                  var usernameElement = document.createElement('span');
+                  var usernameText = document.createTextNode(message.sender);
+                  usernameElement.appendChild(usernameText);
+                  messageElement.appendChild(usernameElement);
+              }
+
+              var textElement = document.createElement('p');
+              var messageText = document.createTextNode(message.content);
+              textElement.appendChild(messageText);
+
+              messageElement.appendChild(textElement);
+
+              messageArea.appendChild(messageElement);
+              messageArea.scrollTop = messageArea.scrollHeight;
+          }
+
+
+          function getAvatarColor(messageSender) {
+              var hash = 0;
+              for (var i = 0; i < messageSender.length; i++) {
+                  hash = 31 * hash + messageSender.charCodeAt(i);
+              }
+
+              var index = Math.abs(hash % colors.length);
+              return colors[index];
+          }
+
+
+          // loginBtn.click(function (event){
+          //     myLogin(event)
+          // })
+          // sendMsgBtn.click(function (){
+          //     sendMessage()
+          // })
+          //
+          // usernameInput.bind('keypress',function(event){
+          //     if(event.keyCode == "13") {
+          //         myLogin(event)
+          //     }
+          // });
+          //
+          // messageInput.bind('keypress',function(event){
+          //     if(event.keyCode == "13") {
+          //         sendMessage()
+          //     }
+          // });
+
+          usernameForm.submit(function (event) {
+              event.preventDefault()
+              myLogin(event)
+          })
+
+          messageForm.submit(function (event) {
+              event.preventDefault()
+              sendMessage(event)
+          })
+
+      })
+  </script>
   </body>
 </html>

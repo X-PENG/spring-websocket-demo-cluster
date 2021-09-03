@@ -33,8 +33,13 @@ function connect(event) {
 
 
 function onConnected() {
+    window.alert("username="+username);
     // Subscribe to the Public Topic
-    stompClient.subscribe('/topic/public', onMessageReceived);
+    // stompClient.subscribe('/topic/public', onMessageReceived);
+
+    //Subscribe to the unique destination
+    // stompClient.subscribe('/unique/' + username, onMessageReceived);
+    stompClient.subscribe('/user/unique/chat', onMessageReceived);
 
     // Tell your username to the server
     stompClient.send("/app/chat.addUser",
@@ -119,3 +124,5 @@ function getAvatarColor(messageSender) {
 
 usernameForm.addEventListener('submit', connect, true)
 messageForm.addEventListener('submit', sendMessage, true)
+
+
