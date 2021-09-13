@@ -13,9 +13,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Autowired
     MyHandShakeHandler myHandShakeHandler;
 
+    @Autowired
+    UserAuthenticationHandshakeInterceptor userAuthenticationHandshakeInterceptor;
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws").setHandshakeHandler(myHandShakeHandler).withSockJS();
+        registry.addEndpoint("/ws").addInterceptors(userAuthenticationHandshakeInterceptor).setHandshakeHandler(myHandShakeHandler).withSockJS();
     }
 
     @Override
