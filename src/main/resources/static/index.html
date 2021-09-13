@@ -12,7 +12,7 @@
 
     <div id="username-page">
         <div class="username-page-container">
-            <h1 class="title">Type your username</h1>
+            <h1 id="loginTitle" class="title">Type your username</h1>
             <form id="usernameForm" name="usernameForm">
                 <div class="form-group">
                     <input type="text" id="name" placeholder="Username" autocomplete="off" class="form-control" />
@@ -67,6 +67,7 @@
   <script language="JavaScript">
       $(function () {
           console.log("init初始化")
+          var port = 0;
           var usernamePage = $('#username-page');
           var chatPage = $('#chat-page');
           var usernameInput = $('#name');
@@ -90,6 +91,19 @@
               '#2196F3', '#32c787', '#00BCD4', '#ff5652',
               '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
           ];
+
+
+          function showPort() {
+              console.log("showPort")
+              $.get("/env/port/", function (data, status) {
+                  console.log("获取服务端口：" + data)
+                  port = data;
+                  $("#loginTitle").text($("#loginTitle").text() + "【" +port + "】")
+                  $("#curUserBox").text($("#curUserBox").text() + "【" +port + "】")
+              })
+          }
+
+          showPort();
 
           function myLogin(event) {
               username = usernameInput.val()
