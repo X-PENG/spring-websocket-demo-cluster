@@ -165,6 +165,7 @@
           function onError(error) {
               console.log('[onError]stomp error', error)
               connectingElement.removeClass('hidden');
+              alert(error)
               connectingElement.text('Could not connect to WebSocket server. Please refresh this page to try again!');
               connectingElement.css('color', 'red')
           }
