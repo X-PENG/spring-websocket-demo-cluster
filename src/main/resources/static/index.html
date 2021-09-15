@@ -139,7 +139,10 @@
                   };
 
                   stompClient = Stomp.over(socket);
-
+                  // stompClient.heartbeat.outgoing = 0;
+                  // stompClient.heartbeat.incoming = 0;
+                  stompClient.heartbeat.outgoing = 5000;
+                  stompClient.heartbeat.incoming = 5000;
                   stompClient.connect({}, onConnected, onError);
               }
           }
