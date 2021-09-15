@@ -84,6 +84,7 @@
           var messageForm = $('#messageForm');
           var messageForm2 = $('#messageForm2');
 
+          var sock = null;
           var stompClient = null;
           var username = null;
 
@@ -124,6 +125,19 @@
                   curUserBox.append(userSpan);
 
                   var socket = new SockJS('/ws');
+                  sock = socket;
+                  //处理sockjs事件
+                  console.log("handleSockJsEvent")
+                  sock.onopen = function() {
+                      console.log('sock.onopen');
+                  };
+                  sock.onmessage = function(e) {
+                      console.log('sock.onmessage：', e.data);
+                  };
+                  sock.onclose = function() {
+                      console.log('sock.onclose');
+                  };
+
                   stompClient = Stomp.over(socket);
 
                   stompClient.connect({}, onConnected, onError);
@@ -149,6 +163,8 @@
 
 
           function onError(error) {
+              console.log('[onError]stomp error', error)
+              connectingElement.removeClass('hidden');
               connectingElement.text('Could not connect to WebSocket server. Please refresh this page to try again!');
               connectingElement.css('color', 'red')
           }
