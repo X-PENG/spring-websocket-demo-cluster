@@ -141,8 +141,8 @@
                   stompClient = Stomp.over(socket);
                   // stompClient.heartbeat.outgoing = 0;
                   // stompClient.heartbeat.incoming = 0;
-                  stompClient.heartbeat.outgoing = 5000;
-                  stompClient.heartbeat.incoming = 5000;
+                  // stompClient.heartbeat.outgoing = 5000;
+                  // stompClient.heartbeat.incoming = 5000;
                   stompClient.connect({}, onConnected, onError);
               }
           }
@@ -156,7 +156,7 @@
               stompClient.subscribe('/user/unique/chat', onMessageReceived);
 
               // Tell your username to the server
-              stompClient.send("/app/chat.addUser",
+              stompClient.send("/app/chat.send",
                   {},
                   JSON.stringify({sender: username, type: 'JOIN'})
               )
@@ -185,7 +185,7 @@
                       type: 'CHAT'
                   };
 
-                  stompClient.send("/app/chat.sendAll", {}, JSON.stringify(chatMessage));
+                  stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
                   messageInput.val('');
               }
           }
@@ -203,7 +203,7 @@
                       type: 'SINGLE_CHAT'
                   };
 
-                  stompClient.send("/app/chat.sendToUser", {}, JSON.stringify(chatMessage));
+                  stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
                   messageInput.val('');
               }
           }

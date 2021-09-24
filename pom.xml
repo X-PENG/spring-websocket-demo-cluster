@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <rocketmq-client.version>4.5.1</rocketmq-client.version>
     </properties>
 
     <dependencies>
@@ -51,6 +52,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+            <version>${rocketmq-client.version}</version>
         </dependency>
     </dependencies>
 
