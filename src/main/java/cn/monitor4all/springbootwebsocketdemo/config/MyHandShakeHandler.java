@@ -12,10 +12,6 @@ import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.Map;
 
-/**
- * @author xiezhipeng <xiezhipeng.peng@bytedance.com>
- * @Date 2021/09/03
- */
 @Component
 public class MyHandShakeHandler extends DefaultHandshakeHandler {
     @Override
