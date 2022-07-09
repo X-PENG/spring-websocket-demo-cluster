@@ -1,6 +1,5 @@
 package cn.monitor4all.springbootwebsocketdemo.config;
 
-import cn.monitor4all.springbootwebsocketdemo.controller.UserController;
 import cn.monitor4all.springbootwebsocketdemo.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,6 @@ import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.Map;
 
-/**
- * @author xiezhipeng <xiezhipeng.peng@bytedance.com>
- * @Date 2021/09/03
- */
 @Slf4j
 @Component
 public class MyHandShakeHandler extends DefaultHandshakeHandler {
