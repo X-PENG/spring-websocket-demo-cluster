@@ -8,10 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 
-/**
- * @author xiezhipeng <xiezhipeng.peng@bytedance.com>
- * @Date 2021/09/03
- */
 @Slf4j
 @RestController
 @RequestMapping("/user")
